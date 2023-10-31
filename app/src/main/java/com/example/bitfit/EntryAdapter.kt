@@ -18,19 +18,17 @@ class EntryAdapter(private val entries: List<EntryEntity>):
         }
     }
 
+
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val context = parent.context
         val inflater = LayoutInflater.from(context)
-        // Inflate the custom layout
         val contactView = inflater.inflate(R.layout.entry_item, parent, false)
-        // Return a new holder instance
         return ViewHolder(contactView)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        // Get the data model based on position
         val entry = entries.get(position)
-        // Set item views based on views and data model
         holder.entry_title.text = entry.title
         holder.entry_body.text = entry.body
     }
@@ -40,4 +38,8 @@ class EntryAdapter(private val entries: List<EntryEntity>):
     }
 
 
-}
+
+
+    }
+
+

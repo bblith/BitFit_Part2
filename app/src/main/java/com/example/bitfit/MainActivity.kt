@@ -7,6 +7,7 @@ import android.widget.Button
 import android.widget.EditText
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -14,57 +15,46 @@ import kotlinx.coroutines.launch
 class MainActivity : AppCompatActivity() {
 
     private lateinit var database: AppDatabase
-    private lateinit var entryRv: RecyclerView
-    lateinit var entries: List<EntryEntity>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         database = AppDatabase.getInstance(this)
-        entryRv = findViewById(R.id.entryRV)
 
-
-        // Observe changes in the database and update the RecyclerView accordingly
-        database.entryDao().getAll().observe(this, { dbEntries ->
-            val adapter = EntryAdapter(dbEntries)
-            entryRv.adapter = adapter
-        })
-
-        entryRv.layoutManager = LinearLayoutManager(this)
-
-        findViewById<Button>(R.id.newEntryButton).setOnClickListener {
-            showEntryDetailDialog()
+        if (savedInstanceState == null) {
+            supportFragmentManager.beginTransaction()
+                .add(R.id.fragment_container, EntriesFragment())
+                .commit()
         }
-    }
 
+        val bottomNavigationView: BottomNavigationView = findViewById(R.id.bottom_navigation)
+        bottomNavigationView.setOnNavigationItemSelectedListener { menuItem ->
+            val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
 
-    private fun showEntryDetailDialog() {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.entry_detail)
-
-        val titleEditText = dialog.findViewById<EditText>(R.id.detail_title)
-        val bodyEditText = dialog.findViewById<EditText>(R.id.detail_body)
-        val enterButton = dialog.findViewById<Button>(R.id.enterButton)
-
-        enterButton.setOnClickListener {
-            val title = titleEditText.text.toString().trim()
-            val body = bodyEditText.text.toString().trim()
-
-            if (title.isNotEmpty() && body.isNotEmpty()) {
-                val entry = EntryEntity(title = title, body = body)
-
-                // Use coroutines to perform database operation on a background thread
-                CoroutineScope(Dispatchers.IO).launch {
-                    database.entryDao().insert(entry)
+            when (menuItem.itemId) {
+                R.id.nav_create_entry -> {
+                    if (currentFragment !is CreateEntryFragment) {
+                        supportFragmentManager.beginTransaction()
+                            .replace(R.id.fragment_container, CreateEntryFragment())
+                            .addToBackStack(null)
+                            .commit()
+                    }
+                    true
                 }
 
-                dialog.dismiss()
+                R.id.nav_entries -> {
+                    if (currentFragment !is EntriesFragment) {
+                        supportFragmentManager.beginTransaction()
+                            .replace(R.id.fragment_container, EntriesFragment())
+                            .addToBackStack(null)
+                            .commit()
+                    }
+                    true
+                }
+
+                else -> false
             }
         }
-
-        dialog.show()
     }
-
-
 }

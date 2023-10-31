@@ -15,4 +15,7 @@ interface EntryDao {
 
     @Query("DELETE FROM entry_table")
     fun deleteAll()
+    @Query("SELECT COUNT(*) FROM entry_table")
+    fun getCount(): Int
+
 }
